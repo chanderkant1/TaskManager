@@ -1,29 +1,30 @@
 import { Component, Input } from '@angular/core';
-import { HeaderComponent } from '../header/header.component';
 import { Task } from '../task';
 import { TaskService } from '../task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { UpdatetaskComponent } from '../updatetask/updatetask.component';
 
 @Component({
   selector: 'app-view',
-  imports: [HeaderComponent,CommonModule,UpdatetaskComponent],
+  imports: [CommonModule],
   templateUrl: './view.component.html',
   styleUrl: './view.component.css'
 })
 export class ViewComponent {
   tasks: Task[] = []; 
   @Input()
-  username !: string ;
-  constructor(private taskservice:TaskService , private router:Router,private route : ActivatedRoute){
-
-  }
-  ngOnInit(){
+  username!: string;
+  
+  constructor(private taskservice: TaskService, private router: Router, private route: ActivatedRoute) {}
+  
+  ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      this.username = params['username'];
+      this.username = params['username'] || '';
+      console.log("username from view is:", this.username);
       if (this.username) {
         this.getTaskList(this.username);
+      } else {
+        console.log("No username provided in query parameters.");
       }
     });
   }
@@ -33,26 +34,31 @@ export class ViewComponent {
       data => {
         console.log("Received tasks:", data);
         this.tasks = data;
-      },
-      error => console.error("not getting tasks:", error)
+      }
     );
   }
   
-  deleteTask(id:number)
-  {
-    this.taskservice.deleteTask(id).subscribe(data=>
-    {
+  deleteTask(id: number) {
+    this.taskservice.deleteTask(id).subscribe(data => {
       console.log(data);
       this.getTaskList(this.username);
-    }
-    )
+    });
   }
-  showDetails(id:number){
-    this.router.navigate(['task-details',id]);
+
+  showDetails(id: number) {
+    this.router.navigate(['task-details', id]);
   }
 
   updateTask(id: number) {
-    console.log("Navigating to update task with ID:", id);
-    this.router.navigateByUrl(`/update/${id}`);
+    console.log("moving to update task with id:", id, "for user:", this.username);
+    this.router.navigate(['/update', id], { queryParams: { username: this.username } });
+  }
+
+  createTask() {
+    if (!this.username) {
+      console.error("Username is not present");
+      return;
+    }
+    this.router.navigate(['/create'], { queryParams: { username: this.username } });
   }
 }

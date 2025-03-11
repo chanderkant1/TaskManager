@@ -23,7 +23,7 @@ export const routes: Routes = [
         path:"footer" , component:FooterComponent
     },
     {
-        path:"create" , component: CreatetaskComponent
+        path:"create" , component: CreatetaskComponent,
     },
     {
         path: "update/:id", component: UpdatetaskComponent
